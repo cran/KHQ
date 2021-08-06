@@ -2,7 +2,7 @@
 % Please edit documentation in R/KHQConvKHQ5D.R
 \name{KHQConvKHQ5D}
 \alias{KHQConvKHQ5D}
-\title{KHQConvKHQ5D}
+\title{Convert KHQ items to KHQ5D health states}
 \usage{
 KHQConvKHQ5D(
   scores,

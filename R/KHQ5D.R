@@ -1,12 +1,14 @@
 
 
-#' @title KHQ5D
+#' @title Convert the health states of the KHQ5D to index value
 #' @description Function used to convert the scores of the five dimensions of 
 #'   the KHQ5D to a single utility index using country specific value set.
 #' @param scores data.frame with colnames RL, PL, SL, E, and S representing 
 #'   Role limitation, Physical limitation, Social Limitation, Emotions 
-#'   and Sleep. Alternatively an KHQ5D score can be provided in five digit 
-#'   format e.g., 11111, c(11111).
+#'   and Sleep. Alternatively a data.frame with the KHQ5D health profiles can be 
+#'   provided in a five digit format e.g., data.frame(state = c(11111, 22432, 
+#'   34241, 43332)) or only the five digit e.g., 11111, c(11111), c(11111, 22432, 
+#'   34241).
 #' @param country string specifying the country in which the value set scores 
 #'   were calculated.
 #' @param type string specifying method type used in deriving value set scores.
@@ -15,13 +17,21 @@
 #' @param year string specifying the year the article containing the value set 
 #'   scores was published.
 #' @param source string specifying the version of the King's Health Questionnaire used.
-#' @param save.xlsx logical to indicate whether or not save the results; Default: FALSE.
-#' @param filename string specifying the file name if save.xlsx = TRUE; 
-#'   Default: "Res_KHQ5D_uti_ind.xlsx".
-#' @param sheetName string specifying the sheet name if save.xlsx = TRUE; 
-#'   Default: "Utility_Index".
 #' @param ignore.invalid logical to indicate whether to ignore items data 
 #'   with invalid, incomplete or missing data; Default: FALSE.
+#' @param weights logical to indicate whether or not save the weights of each 
+#'   score of the KHQ5D. If weights = TRUE the weights will be generated and 
+#'   if weights and save.xlsx = TRUE an Excel file will be saved with the 
+#'   weights of each score plus the utility index under filename = 
+#'   "Res_KHQ5D_weig_uti_ind.xlsx" and sheetName = "Weights_Utility_Index". 
+#'   It is also possible to indicate another name, both for the file and for 
+#'   the sheet; Default: NULL.
+#' @param save.xlsx logical to indicate whether or not save the results; Default: FALSE.
+#' @param filename string specifying the file name if save.xlsx = TRUE; 
+#'   Default: "Res_KHQ5D_uti_ind.xlsx". If weights = true, default: 
+#'   "Res_KHQ5D_weig_uti_ind.xlsx".
+#' @param sheetName string specifying the sheet name if save.xlsx = TRUE; 
+#'   Default: "Utility_Index". If weights = true, default: "Weights_Utility_Index".
 #' @return A data frame with utility index scores of the KHQ5D.
 #' @details Named vector RL, PL, SL, E and S represent Role limitation, 
 #'   Physical limitation, Social Limitation, Emotions and Sleep, respectfully.
@@ -30,40 +40,43 @@
 #' @examples 
 #' KHQ5D(scores = c(RL=1,PL=1,SL=1,E=1,S=1), country = "UK", 
 #'   type = "SG", author = "Brazier", year = 2008, 
-#'   source = "KHQ", ignore.invalid = TRUE)
+#'   source = "KHQ", ignore.invalid = TRUE, weights = NULL)
 #' 
 #' KHQ5D(scores = c(RL=1,PL=1,SL=1,E=1,S=1), country = "UK",
 #'   type = "SG", author = "Brazier", year = 2008,
-#'   source = "KHQ", save.xlsx = FALSE, 
+#'   source = "KHQ", ignore.invalid = TRUE, 
+#'   weights = NULL, save.xlsx = FALSE, 
 #'   filename = "Res_KHQ5D_uti_ind.xlsx",
-#'   sheetName = "Utility_Index",
-#'   ignore.invalid = TRUE)
+#'   sheetName = "Utility_Index")
 #' 
 #' KHQ5D(scores = 11111, country = "UK", type = "SG", 
 #'   author = "Brazier", year = 2008, source = "KHQ", 
 #'   ignore.invalid = TRUE)
 #' 
-#' KHQ5D(scores = 11111, country = "UK", type = "SG", 
+#' KHQ5D(scores = c(11111), country = "UK", type = "SG", 
 #'   author = "Brazier", year = 2008, source = "KHQ", 
 #'   ignore.invalid = TRUE)
+#'   
+#' KHQ5D(scores = c(11111, 22432, 34241, 43332, 22141), 
+#'   country = "UK", type = "SG", author = "Brazier", 
+#'   year = 2008, source = "KHQ", ignore.invalid = TRUE)
 #' 
 #' scores.df <- data.frame(
 #'   RL = c(1,2,3,4,2), 
 #'   PL = c(4,3,4,3,2), 
 #'   SL = c(1,2,2,4,1), 
 #'   E = c(1,3,4,3,4), 
-#'   S = c(1,2,1,2,1)
-#'   )
+#'   S = c(1,2,1,2,1))
 #' 
 #' KHQ5D(scores = scores.df, country = "UK", type = "SG", 
 #'   author = "Brazier", year = 2008, source = "KHQ", 
-#'   ignore.invalid = TRUE) 
+#'   ignore.invalid = TRUE)
 #' 
 #' scores.df2 <- data.frame(state = c(11111, 22432, 34241, 43332, 22141))
 #' 
 #' KHQ5D(scores = scores.df2, country = "UK", type = "SG", 
 #'   author = "Brazier", year = 2008, source = "KHQ", 
-#'   ignore.invalid = TRUE)  
+#'   ignore.invalid = TRUE)
 #' 
 #' KHQ5D(scores = scores.df2$state, country = "UK", type = "SG", 
 #'   author = "Brazier", year = 2008, source = "KHQ", 
@@ -71,15 +84,14 @@
 #' 
 #' KHQ5D(scores = KHQ5D_data, country = "UK", type = "SG", 
 #'   author = "Brazier", year = 2008, source = "KHQ", 
-#'   ignore.invalid = TRUE) 
+#'   ignore.invalid = TRUE, weights = TRUE)
 #' 
 #' @seealso 
-#'  \code{\link[KHQ]{KHQConvKHQ5D}}
+#'  \code{\link[KHQ]{KHQConvKHQ5D}} and \code{\link[KHQ]{KHQ5DFreq}}
 #' @rdname KHQ5D
 #' @export 
 #' @importFrom magrittr %>%
 #' @importFrom openxlsx write.xlsx
-#' @importFrom stats na.omit
 
 
 KHQ5D <- function(
@@ -89,10 +101,11 @@ KHQ5D <- function(
   author,
   year,
   source,
+  ignore.invalid = FALSE,
+  weights = NULL,
   save.xlsx = FALSE,
   filename = NULL,
-  sheetName = NULL,
-  ignore.invalid = FALSE
+  sheetName = NULL
 ){
   
   
@@ -135,11 +148,7 @@ KHQ5D <- function(
   
   
   # Checking NAs
-  if (ignore.invalid == TRUE & any(is.na(scores) == TRUE)) {
-    rowNAs = which(is.na(scores) == TRUE, arr.ind = TRUE) %>% data.frame()
-    scores[unique(rowNAs$row),] <- NA
-    
-  } else if (ignore.invalid == FALSE & any(is.na(scores) == TRUE)){
+  if (ignore.invalid == FALSE & any(is.na(scores) == TRUE)){
     rowNAs = which(is.na(scores) == TRUE, arr.ind = TRUE) %>% data.frame()
     print(scores[unique(rowNAs$row),])
     stop("Missing/non-numeric dimension found. In case the response was randomly lost, consider use ignore.invalid == TRUE to avoid further problems.")
@@ -147,8 +156,8 @@ KHQ5D <- function(
   
   
   # Checking coded scores
-  if (any(apply(stats::na.omit(scores), 1, function(x) !all(x %in% 1:4)) == TRUE)) {
-    rowCodedWrong <- data.frame(rowCodedWrong = apply(stats::na.omit(scores), 1, function(x) !all(x %in% 1:4)))
+  if (any(apply(scores, 1, function(x) !all(x %in% c(NA,1:4))) == TRUE)) {
+    rowCodedWrong <- data.frame(rowCodedWrong = apply(scores, 1, function(x) !all(x %in% c(NA,1:4))))
     rowCodedWrong <- data.frame(rowCodedWrong = rowCodedWrong, numRowCodeWrong = rownames(rowCodedWrong))
     print(scores[rowCodedWrong[rowCodedWrong[,1] == "TRUE", 2],])
     stop("Scores must be coded as 1, 2, 3 or 4 for KHQ5D.")
@@ -210,15 +219,39 @@ KHQ5D <- function(
   
   
   # Calculate utility index
-  Uti_Ind <- data.frame(matrix(0, nrow = nrow(scores), ncol = ncol(scores)))
-  colnames(Uti_Ind) <- DimensionNames
+  df_weight <- data.frame(matrix(0, nrow = nrow(scores), ncol = ncol(scores)))
+  colnames(df_weight) <- DimensionNames
   
   for (i in 1:nrow(scores)) {
-    Uti_Ind[i,1] <- df_Sco_Uti_Ind[scores[i,1],1]
-    Uti_Ind[i,2] <- df_Sco_Uti_Ind[scores[i,2],2]
-    Uti_Ind[i,3] <- df_Sco_Uti_Ind[scores[i,3],3]
-    Uti_Ind[i,4] <- df_Sco_Uti_Ind[scores[i,4],4]
-    Uti_Ind[i,5] <- df_Sco_Uti_Ind[scores[i,5],5]
+    if (is.na(scores[i,1])) {
+      df_weight[i,1] <- NA
+    } else {
+      df_weight[i,1] <- df_Sco_Uti_Ind[scores[i,1],1]
+    }
+    
+    if (is.na(scores[i,2])) {
+      df_weight[i,2] <- NA
+    } else {
+      df_weight[i,2] <- df_Sco_Uti_Ind[scores[i,2],2]
+    }
+    
+    if (is.na(scores[i,3])) {
+      df_weight[i,3] <- NA
+    } else {
+      df_weight[i,3] <- df_Sco_Uti_Ind[scores[i,3],3]
+    }
+    
+    if (is.na(scores[i,4])) {
+      df_weight[i,4] <- NA
+    } else {
+      df_weight[i,4] <- df_Sco_Uti_Ind[scores[i,4],4]
+    }
+    
+    if (is.na(scores[i,5])) {
+      df_weight[i,5] <- NA
+    } else {
+      df_weight[i,5] <- df_Sco_Uti_Ind[scores[i,5],5]
+    }
   }
   
   FullHealth <- Utility_Index_data[which(Utility_Index_data$Variables == "FullHealth"),2] %>% as.numeric()
@@ -226,12 +259,18 @@ KHQ5D <- function(
   df_Uti_Ind <- data.frame(UtilityIndex = 1:nrow(scores))
   
   for (i in 1:nrow(scores)) {
-    df_Uti_Ind[i,] <- FullHealth - abs(sum(Uti_Ind[i,])) 
+    df_Uti_Ind[i,] <- FullHealth - abs(sum(df_weight[i,])) 
   }
   
   
+  # Creating a data.frame with the weights and the utility index
+  if (!is.null(weights)) {df_Uti_Ind <- cbind(df_weight, df_Uti_Ind)}
+  
   # Saving results to an Excel file
-  if (save.xlsx == TRUE & is.null(filename) & is.null(sheetName)) {
+  if (!is.null(weights) & save.xlsx == TRUE & is.null(filename) & is.null(sheetName)) {
+    openxlsx::write.xlsx(df_Uti_Ind, file = "Res_KHQ5D_weig_uti_ind.xlsx", sheetName = "Weights_Utility_Index", keepNA = FALSE, na.string = "NA", overwrite = TRUE)
+    
+  } else if (save.xlsx == TRUE & is.null(filename) & is.null(sheetName)) {
     openxlsx::write.xlsx(df_Uti_Ind, file = "Res_KHQ5D_uti_ind.xlsx", sheetName = "Utility_Index", keepNA = FALSE, na.string = "NA", overwrite = TRUE)
     
   } else if (save.xlsx == TRUE) {

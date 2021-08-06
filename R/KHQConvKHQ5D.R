@@ -20,7 +20,7 @@
 # Sleep                 - 7a
 
 
-#' @title KHQConvKHQ5D
+#' @title Convert KHQ items to KHQ5D health states
 #' @description Function used to convert the KHQ item scores to KHQ5D scores.
 #' @param scores data.frame containing 9 items that compose the KHQ5D; colnames
 #'   must be 3a, 3b, 4a, 4b, 4d, 5c, 6a, 6b, and 7a.

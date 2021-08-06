@@ -2,17 +2,18 @@
 % Please edit documentation in R/KHQScores.R
 \name{KHQScores}
 \alias{KHQScores}
-\title{KHQScores}
+\title{Generate scores for each dimension of the KHQ}
 \usage{
 KHQScores(
   scores,
   country,
   author,
   year,
+  ignore.invalid = FALSE,
+  mean.na = FALSE,
   save.xlsx = FALSE,
   filename = NULL,
-  sheetName = NULL,
-  ignore.invalid = FALSE
+  sheetName = NULL
 )
 }
 \arguments{
@@ -31,6 +32,12 @@ structure used to calculate the score.}
 \item{year}{string specifying the year the article with the structure used
 to calculated the scores was published.}
 
+\item{ignore.invalid}{logical to indicate whether to ignore items data
+with invalid, incomplete or missing data; Default: FALSE.}
+
+\item{mean.na}{logical to indicate whether or not to use the mean of the
+dimension items when there is NA in the data; Default: FALSE.}
+
 \item{save.xlsx}{logical to indicate whether or not save the results; Default: FALSE.}
 
 \item{filename}{string specifying the file name if save.xlsx = TRUE;
@@ -38,9 +45,6 @@ Default: "Res_Scores_Dimensions_KHQ.xlsx".}
 
 \item{sheetName}{string specifying the sheet name if save.xlsx = TRUE;
 Default: "Scores".}
-
-\item{ignore.invalid}{logical to indicate whether to ignore items data
-with invalid, incomplete or missing data, Default: FALSE}
 }
 \value{
 A data frame with scores of each dimension of the KHQ.
@@ -80,19 +84,19 @@ scores_UK <- data.frame(
   check.names = FALSE)
 
 KHQScores(scores = scores_UK, country = "UK",
-  author = "Kelleher", year = 1997, ignore.invalid = TRUE)
+  author = "Kelleher", year = 1997, ignore.invalid = TRUE,
+  mean.na = FALSE)
   
 KHQScores(scores = scores_UK, country = "UK",
-  author = "Kelleher", year = 1997, save.xlsx = FALSE,
+  author = "Kelleher", year = 1997, ignore.invalid = TRUE,
+  mean.na = FALSE, save.xlsx = FALSE, 
   filename = "Res_Scores_Dimensions_KHQ.xlsx",
-  sheetName = "Scores", ignore.invalid = TRUE)
+  sheetName = "Scores")
 
 KHQScores(scores = KHQ_data_Kelleher, country = "UK",
-  author = "Kelleher", year = 1997, save.xlsx = FALSE,
+  author = "Kelleher", year = 1997, ignore.invalid = TRUE,
+  mean.na = FALSE, save.xlsx = FALSE, 
   filename = "Res_Scores_Dimensions_KHQ.xlsx",
-  sheetName = "Scores", ignore.invalid = TRUE)
+  sheetName = "Scores")
 
-}
-\seealso{
-\code{\link[KHQ]{KHQConvKHQ5D}}
 }

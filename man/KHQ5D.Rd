@@ -2,7 +2,7 @@
 % Please edit documentation in R/KHQ5D.R
 \name{KHQ5D}
 \alias{KHQ5D}
-\title{KHQ5D}
+\title{Convert the health states of the KHQ5D to index value}
 \usage{
 KHQ5D(
   scores,
@@ -11,17 +11,20 @@ KHQ5D(
   author,
   year,
   source,
+  ignore.invalid = FALSE,
+  weights = NULL,
   save.xlsx = FALSE,
   filename = NULL,
-  sheetName = NULL,
-  ignore.invalid = FALSE
+  sheetName = NULL
 )
 }
 \arguments{
 \item{scores}{data.frame with colnames RL, PL, SL, E, and S representing
 Role limitation, Physical limitation, Social Limitation, Emotions
-and Sleep. Alternatively an KHQ5D score can be provided in five digit
-format e.g., 11111, c(11111).}
+and Sleep. Alternatively a data.frame with the KHQ5D health profiles can be
+provided in a five digit format e.g., data.frame(state = c(11111, 22432,
+34241, 43332)) or only the five digit e.g., 11111, c(11111), c(11111, 22432,
+34241).}
 
 \item{country}{string specifying the country in which the value set scores
 were calculated.}
@@ -36,16 +39,25 @@ scores was published.}
 
 \item{source}{string specifying the version of the King's Health Questionnaire used.}
 
+\item{ignore.invalid}{logical to indicate whether to ignore items data
+with invalid, incomplete or missing data; Default: FALSE.}
+
+\item{weights}{logical to indicate whether or not save the weights of each
+score of the KHQ5D. If weights = TRUE the weights will be generated and
+if weights and save.xlsx = TRUE an Excel file will be saved with the
+weights of each score plus the utility index under filename =
+"Res_KHQ5D_weig_uti_ind.xlsx" and sheetName = "Weights_Utility_Index".
+It is also possible to indicate another name, both for the file and for
+the sheet; Default: NULL.}
+
 \item{save.xlsx}{logical to indicate whether or not save the results; Default: FALSE.}
 
 \item{filename}{string specifying the file name if save.xlsx = TRUE;
-Default: "Res_KHQ5D_uti_ind.xlsx".}
+Default: "Res_KHQ5D_uti_ind.xlsx". If weights = true, default:
+"Res_KHQ5D_weig_uti_ind.xlsx".}
 
 \item{sheetName}{string specifying the sheet name if save.xlsx = TRUE;
-Default: "Utility_Index".}
-
-\item{ignore.invalid}{logical to indicate whether to ignore items data
-with invalid, incomplete or missing data; Default: FALSE.}
+Default: "Utility_Index". If weights = true, default: "Weights_Utility_Index".}
 }
 \value{
 A data frame with utility index scores of the KHQ5D.
@@ -61,40 +73,43 @@ Physical limitation, Social Limitation, Emotions and Sleep, respectfully.
 \examples{
 KHQ5D(scores = c(RL=1,PL=1,SL=1,E=1,S=1), country = "UK", 
   type = "SG", author = "Brazier", year = 2008, 
-  source = "KHQ", ignore.invalid = TRUE)
+  source = "KHQ", ignore.invalid = TRUE, weights = NULL)
 
 KHQ5D(scores = c(RL=1,PL=1,SL=1,E=1,S=1), country = "UK",
   type = "SG", author = "Brazier", year = 2008,
-  source = "KHQ", save.xlsx = FALSE, 
+  source = "KHQ", ignore.invalid = TRUE, 
+  weights = NULL, save.xlsx = FALSE, 
   filename = "Res_KHQ5D_uti_ind.xlsx",
-  sheetName = "Utility_Index",
-  ignore.invalid = TRUE)
+  sheetName = "Utility_Index")
 
 KHQ5D(scores = 11111, country = "UK", type = "SG", 
   author = "Brazier", year = 2008, source = "KHQ", 
   ignore.invalid = TRUE)
 
-KHQ5D(scores = 11111, country = "UK", type = "SG", 
+KHQ5D(scores = c(11111), country = "UK", type = "SG", 
   author = "Brazier", year = 2008, source = "KHQ", 
   ignore.invalid = TRUE)
+  
+KHQ5D(scores = c(11111, 22432, 34241, 43332, 22141), 
+  country = "UK", type = "SG", author = "Brazier", 
+  year = 2008, source = "KHQ", ignore.invalid = TRUE)
 
 scores.df <- data.frame(
   RL = c(1,2,3,4,2), 
   PL = c(4,3,4,3,2), 
   SL = c(1,2,2,4,1), 
   E = c(1,3,4,3,4), 
-  S = c(1,2,1,2,1)
-  )
+  S = c(1,2,1,2,1))
 
 KHQ5D(scores = scores.df, country = "UK", type = "SG", 
   author = "Brazier", year = 2008, source = "KHQ", 
-  ignore.invalid = TRUE) 
+  ignore.invalid = TRUE)
 
 scores.df2 <- data.frame(state = c(11111, 22432, 34241, 43332, 22141))
 
 KHQ5D(scores = scores.df2, country = "UK", type = "SG", 
   author = "Brazier", year = 2008, source = "KHQ", 
-  ignore.invalid = TRUE)  
+  ignore.invalid = TRUE)
 
 KHQ5D(scores = scores.df2$state, country = "UK", type = "SG", 
   author = "Brazier", year = 2008, source = "KHQ", 
@@ -102,9 +117,9 @@ KHQ5D(scores = scores.df2$state, country = "UK", type = "SG",
 
 KHQ5D(scores = KHQ5D_data, country = "UK", type = "SG", 
   author = "Brazier", year = 2008, source = "KHQ", 
-  ignore.invalid = TRUE) 
+  ignore.invalid = TRUE, weights = TRUE)
 
 }
 \seealso{
-\code{\link[KHQ]{KHQConvKHQ5D}}
+\code{\link[KHQ]{KHQConvKHQ5D}} and \code{\link[KHQ]{KHQ5DFreq}}
 }

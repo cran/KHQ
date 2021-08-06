@@ -26,7 +26,7 @@
 # Symptom Severity Scale    - 8a, 8b, 8c, 8d, 8e, 8f, 8g, 8h, 8i and 8j
 
 
-#' @title KHQScores
+#' @title Generate scores for each dimension of the KHQ
 #' @description Function used to generate scores for each dimension of the KHQ.
 #' @param scores data.frame containing all the KHQ items. See the 'Details' for 
 #'   information on naming the data.frame columns.
@@ -39,13 +39,15 @@
 #'   structure used to calculate the score.
 #' @param year string specifying the year the article with the structure used 
 #'   to calculated the scores was published.
+#' @param ignore.invalid logical to indicate whether to ignore items data 
+#'   with invalid, incomplete or missing data; Default: FALSE.
+#' @param mean.na logical to indicate whether or not to use the mean of the 
+#'   dimension items when there is NA in the data; Default: FALSE.
 #' @param save.xlsx logical to indicate whether or not save the results; Default: FALSE.
 #' @param filename string specifying the file name if save.xlsx = TRUE; 
 #'   Default: "Res_Scores_Dimensions_KHQ.xlsx".
 #' @param sheetName string specifying the sheet name if save.xlsx = TRUE; 
 #'   Default: "Scores".
-#' @param ignore.invalid logical to indicate whether to ignore items data 
-#'   with invalid, incomplete or missing data, Default: FALSE
 #' @return A data frame with scores of each dimension of the KHQ.
 #' @details If using the original structure the items must be named equal the 
 #'   number in the original questionnaire published by Kelleher and collaborator 
@@ -79,20 +81,21 @@
 #'   check.names = FALSE)
 #' 
 #' KHQScores(scores = scores_UK, country = "UK",
-#'   author = "Kelleher", year = 1997, ignore.invalid = TRUE)
+#'   author = "Kelleher", year = 1997, ignore.invalid = TRUE,
+#'   mean.na = FALSE)
 #'   
 #' KHQScores(scores = scores_UK, country = "UK",
-#'   author = "Kelleher", year = 1997, save.xlsx = FALSE,
+#'   author = "Kelleher", year = 1997, ignore.invalid = TRUE,
+#'   mean.na = FALSE, save.xlsx = FALSE, 
 #'   filename = "Res_Scores_Dimensions_KHQ.xlsx",
-#'   sheetName = "Scores", ignore.invalid = TRUE)
+#'   sheetName = "Scores")
 #' 
 #' KHQScores(scores = KHQ_data_Kelleher, country = "UK",
-#'   author = "Kelleher", year = 1997, save.xlsx = FALSE,
+#'   author = "Kelleher", year = 1997, ignore.invalid = TRUE,
+#'   mean.na = FALSE, save.xlsx = FALSE, 
 #'   filename = "Res_Scores_Dimensions_KHQ.xlsx",
-#'   sheetName = "Scores", ignore.invalid = TRUE)
+#'   sheetName = "Scores")
 #' 
-#' @seealso 
-#'  \code{\link[KHQ]{KHQConvKHQ5D}}
 #' @rdname KHQScores
 #' @export 
 #' @importFrom magrittr %>%
@@ -104,10 +107,11 @@ KHQScores <- function(
   country,
   author,
   year,
+  ignore.invalid = FALSE,
+  mean.na = FALSE,
   save.xlsx = FALSE,
   filename = NULL,
-  sheetName = NULL,
-  ignore.invalid = FALSE
+  sheetName = NULL
 ){
   
   # Checking the class of the data
@@ -255,7 +259,7 @@ KHQScores <- function(
       stop("Scores must be coded as follow: 
       \n General Health Perception  - 1 - from 1 to 5;
       \n Incontinence Impact        - 2 - from 1 to 4;
-      \n Limitations of Daily Life  - 3a, 3b, 3c, 3d and 3e- from 1 to 4;
+      \n Limitations of Daily Life  - 3a, 3b, 3c, 3d and 3e - from 1 to 4;
       \n Personal Relationships     - 4a, 4b and 4c - from 1 to 4, 'not applicable' being 0;
       \n Emotions                   - 5a, 5b and 5c - from 1 to 4;
       \n Sleep/Energy               - 6a and 6b - from 1 to 4;
@@ -266,17 +270,13 @@ KHQScores <- function(
   }
   
   
-  # Calculate scores by domain
+  # Imputing NA to non-applicable questions in the Personal Relationship domain
   if (ncol(scores) == 32) {
-    dfScores <- data.frame(matrix(0, nrow = nrow(scores), ncol = 10))
-    
     scores$"5a"[scores$"5a" == 0] <- NA
     scores$"5b"[scores$"5b" == 0] <- NA
     scores$"5c"[scores$"5c" == 0] <- NA
     
   } else if (ncol(scores) == 28) {
-    dfScores <- data.frame(matrix(0, nrow = nrow(scores), ncol = 8))
-    
     scores$"4a"[scores$"4a" == 0] <- NA
     scores$"4b"[scores$"4b" == 0] <- NA
     scores$"4c"[scores$"4c" == 0] <- NA
@@ -284,7 +284,96 @@ KHQScores <- function(
   }
   
   
+  # Calculating the mean of the domain and imputing the value to missing data from the same domain 
+  if (ncol(scores) == 32 & mean.na == TRUE) {
+    for (i in 1:nrow(scores)) {
+      if (sum(is.na(scores[i,c("3a","3b")])) == 1) {
+        if (is.na(scores$"3a")[i]) {scores$"3a"[i] <- scores$"3b"[i]}
+        if (is.na(scores$"3b")[i]) {scores$"3b"[i] <- scores$"3a"[i]}
+      }
+      
+      if (sum(is.na(scores[i,c("4a","4b")])) == 1) {
+        if (is.na(scores$"4a")[i]) {scores$"4a"[i] <- scores$"4b"[i]}
+        if (is.na(scores$"4b")[i]) {scores$"4b"[i] <- scores$"4a"[i]}
+      }
+      
+      if (sum(is.na(scores[i,c("4c","4d")])) == 1) {
+        if (is.na(scores$"4c")[i]) {scores$"4c"[i] <- scores$"4d"[i]}
+        if (is.na(scores$"4d")[i]) {scores$"4d"[i] <- scores$"4c"[i]}
+      }
+      
+      if (sum(is.na(scores[i,c("5a","5b","5c")])) == 1) {
+        mean.5 <- mean(as.numeric(scores[i,c("5a","5b","5c")]), na.rm = TRUE)
+        if (is.na(scores$"5a")[i]) {scores$"5a"[i] <- mean.5}
+        if (is.na(scores$"5b")[i]) {scores$"5b"[i] <- mean.5}
+        if (is.na(scores$"5c")[i]) {scores$"5c"[i] <- mean.5}
+      }
+      
+      if (sum(is.na(scores[i,c("6a","6b","6c")])) == 1) {
+        mean.6 <- mean(as.numeric(scores[i,c("6a","6b","6c")]), na.rm = TRUE)
+        if (is.na(scores$"6a")[i]) {scores$"6a"[i] <- mean.6}
+        if (is.na(scores$"6b")[i]) {scores$"6b"[i] <- mean.6}
+        if (is.na(scores$"6c")[i]) {scores$"6c"[i] <- mean.6}
+      }
+      
+      if (sum(is.na(scores[i,c("7a","7b")])) == 1) {
+        if (is.na(scores$"7a")[i]) {scores$"7a"[i] <- scores$"7b"[i]}
+        if (is.na(scores$"7b")[i]) {scores$"7b"[i] <- scores$"7a"[i]}
+      }
+      
+      if (sum(is.na(scores[i,c("8a","8b","8c","8d","8e")])) %in% c(1:3)) {
+        mean.8 <- mean(as.numeric(scores[i,c("8a","8b","8c","8d","8e")]), na.rm = TRUE)
+        if (is.na(scores$"8a")[i]) {scores$"8a"[i] <- mean.8}
+        if (is.na(scores$"8b")[i]) {scores$"8b"[i] <- mean.8}
+        if (is.na(scores$"8c")[i]) {scores$"8c"[i] <- mean.8}
+        if (is.na(scores$"8d")[i]) {scores$"8d"[i] <- mean.8}
+        if (is.na(scores$"8e")[i]) {scores$"8e"[i] <- mean.8}
+      }
+    }
+    
+  } else if (ncol(scores) == 28 & mean.na == TRUE) {
+    for (i in 1:nrow(scores)) {
+      if (sum(is.na(scores[i,c("3a","3b","3c","3d","3e")])) %in% c(1:3)) {
+        mean.3 <- mean(as.numeric(scores[i,c("3a","3b","3c","3d","3e")]), na.rm = TRUE)
+        if (is.na(scores$"3a")[i]) {scores$"3a"[i] <- mean.3}
+        if (is.na(scores$"3b")[i]) {scores$"3b"[i] <- mean.3}
+        if (is.na(scores$"3c")[i]) {scores$"3c"[i] <- mean.3}
+        if (is.na(scores$"3d")[i]) {scores$"3d"[i] <- mean.3}
+        if (is.na(scores$"3e")[i]) {scores$"3e"[i] <- mean.3}
+      }
+      
+      if (sum(is.na(scores[i,c("4a","4b","4c")])) == 1) {
+        mean.4 <- mean(as.numeric(scores[i,c("4a","4b","4c")]), na.rm = TRUE)
+        if (is.na(scores$"4a")[i]) {scores$"4a"[i] <- mean.4}
+        if (is.na(scores$"4b")[i]) {scores$"4b"[i] <- mean.4}
+        if (is.na(scores$"4c")[i]) {scores$"4c"[i] <- mean.4}
+      }
+      
+      if (sum(is.na(scores[i,c("5a","5b","5c")])) == 1) {
+        mean.5 <- mean(as.numeric(scores[i,c("5a","5b","5c")]), na.rm = TRUE)
+        if (is.na(scores$"5a")[i]) {scores$"5a"[i] <- mean.5}
+        if (is.na(scores$"5b")[i]) {scores$"5b"[i] <- mean.5}
+        if (is.na(scores$"5c")[i]) {scores$"5c"[i] <- mean.5}
+      }
+      
+      if (sum(is.na(scores[i,c("6a","6b")])) == 1) {
+        if (is.na(scores$"6a")[i]) {scores$"6a"[i] <- scores$"6b"[i]}
+        if (is.na(scores$"6b")[i]) {scores$"6b"[i] <- scores$"6a"[i]}
+      }
+      
+      if (sum(is.na(scores[i,c("7a","7b","7c")])) == 1) {
+        mean.7 <- mean(as.numeric(scores[i,c("7a","7b","7c")]), na.rm = TRUE)
+        if (is.na(scores$"7a")[i]) {scores$"7a"[i] <- mean.7}
+        if (is.na(scores$"7b")[i]) {scores$"7b"[i] <- mean.7}
+        if (is.na(scores$"7c")[i]) {scores$"7c"[i] <- mean.7}
+      }
+    }
+  }
+  
+  
+  # Calculate scores by domain
   if (ncol(scores) == 32 & country == "UK" & author == "Kelleher" & year == 1997) {
+    dfScores <- data.frame(matrix(0, nrow = nrow(scores), ncol = 10))
     colnames(dfScores) <- c("GHP","II","RL","PL","SL","PR","E","SE","SM","SSS")
     
     for (i in 1:nrow(scores)) {
@@ -295,10 +384,7 @@ KHQScores <- function(
       dfScores[i,2] <- ((scores$"2"[i] - 1) / 3) * 100
       
       # Role Limitations
-      if (sum(is.na(scores[i,c("3a","3b")])) == 1) {
-        dfScores[i,3] <- (((sum(scores[i,c("3a","3b")], na.rm = TRUE)) - 1) / 3) * 100
-        
-      } else if (sum(is.na(scores[i,c("3a","3b")])) == 2) {
+      if (sum(is.na(scores[i,c("3a","3b")])) %in% c(1:2)) {
         dfScores[i,3] <- NA
         
       } else {
@@ -307,10 +393,7 @@ KHQScores <- function(
       }
       
       # Physical Limitations
-      if (sum(is.na(scores[i,c("4a","4b")])) == 1) {
-        dfScores[i,4] <- (((sum(scores[i,c("4a","4b")], na.rm = TRUE)) - 1) / 3) * 100
-        
-      } else if (sum(is.na(scores[i,c("4a","4b")])) == 2) {
+      if (sum(is.na(scores[i,c("4a","4b")])) %in% c(1:2)) {
         dfScores[i,4] <- NA
         
       } else {
@@ -322,20 +405,11 @@ KHQScores <- function(
       if (sum(is.na(scores[i,c("4c","4d","5c")])) == 3) {
         dfScores[i,5] <- NA
         
+      } else if (sum(is.na(scores[i,c("4c","4d")])) == 1) {
+        dfScores[i,5] <- NA
+        
       } else if (is.na(scores$"5c"[i])) {
         dfScores[i,5] <- (((sum(scores[i,c("4c","4d")], na.rm = TRUE)) - 2) / 6) * 100
-        
-      } else if (is.na(scores$"4c"[i])) {
-        dfScores[i,5] <- (((sum(scores[i,c("4d","5c")], na.rm = TRUE)) - 2) / 6) * 100
-        
-      } else if (is.na(scores$"4d"[i])) {
-        dfScores[i,5] <- (((sum(scores[i,c("4c","5c")], na.rm = TRUE)) - 2) / 6) * 100
-        
-      } else if (is.na(scores$"4c"[i]) & is.na(scores$"5c"[i])) {
-        dfScores[i,5] <- (((scores$"4d"[i]) - 1) / 3) * 100
-        
-      } else if (is.na(scores$"4d"[i]) & is.na(scores$"5c"[i])) {
-        dfScores[i,5] <- (((scores$"4c"[i]) - 1) / 3) * 100
         
       } else {
         dfScores[i,5] <- (((sum(scores[i,c("4c","4d","5c")], na.rm = TRUE)) - 3) / 9) * 100
@@ -355,13 +429,7 @@ KHQScores <- function(
       }
       
       # Emotions
-      if (sum(is.na(scores[i,c("6a","6b","6c")])) == 1) {
-        dfScores[i,7] <- (((sum(scores[i,c("6a","6b","6c")], na.rm = TRUE)) - 2) / 6) * 100
-        
-      } else if (sum(is.na(scores[i,c("6a","6b","6c")])) == 2) {
-        dfScores[i,7] <- (((sum(scores[i,c("6a","6b","6c")], na.rm = TRUE)) - 1) / 3) * 100
-        
-      } else if (sum(is.na(scores[i,c("6a","6b","6c")])) == 3) {
+      if (sum(is.na(scores[i,c("6a","6b","6c")])) %in% c(1:3)) {
         dfScores[i,7] <- NA
         
       } else {
@@ -370,10 +438,7 @@ KHQScores <- function(
       }
       
       # Sleep/Energy
-      if (sum(is.na(scores[i,c("7a","7b")])) == 1) {
-        dfScores[i,8] <- (((sum(scores[i,c("7a","7b")], na.rm = TRUE)) - 1) / 3) * 100
-        
-      } else if (sum(is.na(scores[i,c("7a","7b")])) == 2) {
+      if (sum(is.na(scores[i,c("7a","7b")])) %in% c(1:2)) {
         dfScores[i,8] <- NA
         
       } else {
@@ -382,19 +447,7 @@ KHQScores <- function(
       }
       
       # Severity Measures
-      if (sum(is.na(scores[i,c("8a","8b","8c","8d","8e")])) == 1) {
-        dfScores[i,9] <- (((sum(scores[i,c("8a","8b","8c","8d","8e")], na.rm = TRUE)) - 4) / 12) * 100
-        
-      } else if (sum(is.na(scores[i,c("8a","8b","8c","8d","8e")])) == 2) {
-        dfScores[i,9] <- (((sum(scores[i,c("8a","8b","8c","8d","8e")], na.rm = TRUE)) - 3) / 9) * 100
-        
-      } else if (sum(is.na(scores[i,c("8a","8b","8c","8d","8e")])) == 3) {
-        dfScores[i,9] <- (((sum(scores[i,c("8a","8b","8c","8d","8e")], na.rm = TRUE)) - 2) / 6) * 100
-        
-      } else if (sum(is.na(scores[i,c("8a","8b","8c","8d","8e")])) == 4) {
-        dfScores[i,9] <- (((sum(scores[i,c("8a","8b","8c","8d","8e")], na.rm = TRUE)) - 1) / 3) * 100
-        
-      } else if (sum(is.na(scores[i,c("8a","8b","8c","8d","8e")])) == 5) {
+      if (sum(is.na(scores[i,c("8a","8b","8c","8d","8e")])) %in% c(1:5)) {
         dfScores[i,9] <- NA
         
       } else {
@@ -410,6 +463,7 @@ KHQScores <- function(
     }
     
   } else if (ncol(scores) == 28 & country == "BR" & author == "Brusaca" & year == 2021) {
+    dfScores <- data.frame(matrix(0, nrow = nrow(scores), ncol = 8))
     colnames(dfScores) <- c("GHP","II","LDL","PR","E","SE","SM","SSS")
     
     for (i in 1:nrow(scores)) {
@@ -420,19 +474,7 @@ KHQScores <- function(
       dfScores[i,2] <- ((scores$"2"[i] - 1) / 3) * 100
       
       # Limitations of Daily Life
-      if (sum(is.na(scores[i,c("3a","3b","3c","3d","3e")])) == 1) {
-        dfScores[i,3] <- (((sum(scores[i,c("3a","3b","3c","3d","3e")], na.rm = TRUE)) - 4) / 12) * 100
-        
-      } else if (sum(is.na(scores[i,c("3a","3b","3c","3d","3e")])) == 2) {
-        dfScores[i,3] <- (((sum(scores[i,c("3a","3b","3c","3d","3e")], na.rm = TRUE)) - 3) / 9) * 100
-        
-      } else if (sum(is.na(scores[i,c("3a","3b","3c","3d","3e")])) == 3) {
-        dfScores[i,3] <- (((sum(scores[i,c("3a","3b","3c","3d","3e")], na.rm = TRUE)) - 2) / 6) * 100
-        
-      } else if (sum(is.na(scores[i,c("3a","3b","3c","3d","3e")])) == 4) {
-        dfScores[i,3] <- (((sum(scores[i,c("3a","3b","3c","3d","3e")], na.rm = TRUE)) - 1) / 3) * 100
-        
-      } else if (sum(is.na(scores[i,c("3a","3b","3c","3d","3e")])) == 5) {
+      if (sum(is.na(scores[i,c("3a","3b","3c","3d","3e")])) %in% c(1:5)) {
         dfScores[i,3] <- NA
         
       } else {
@@ -457,13 +499,7 @@ KHQScores <- function(
       }
       
       # Emotions
-      if (sum(is.na(scores[i,c("5a","5b","5c")])) == 1) {
-        dfScores[i,5] <- (((sum(scores[i,c("5a","5b","5c")], na.rm = TRUE)) - 2) / 6) * 100
-        
-      } else if (sum(is.na(scores[i,c("5a","5b","5c")])) == 2) {
-        dfScores[i,5] <- (((sum(scores[i,c("5a","5b","5c")], na.rm = TRUE)) - 1) / 3) * 100
-        
-      } else if (sum(is.na(scores[i,c("5a","5b","5c")])) == 3) {
+      if (sum(is.na(scores[i,c("5a","5b","5c")])) %in% c(1:3)) {
         dfScores[i,5] <- NA
         
       } else {
@@ -472,10 +508,7 @@ KHQScores <- function(
       }
       
       # Sleep/Energy
-      if (sum(is.na(scores[i,c("6a","6b")])) == 1) {
-        dfScores[i,6] <- (((sum(scores[i,c("6a","6b")], na.rm = TRUE)) - 1) / 3) * 100
-        
-      } else if (sum(is.na(scores[i,c("6a","6b")])) == 2) {
+      if (sum(is.na(scores[i,c("6a","6b")])) %in% c(1:2)) {
         dfScores[i,6] <- NA
         
       } else {
@@ -484,13 +517,7 @@ KHQScores <- function(
       }
       
       # Severity Measures
-      if (sum(is.na(scores[i,c("7a","7b","7c")])) == 1) {
-        dfScores[i,7] <- (((sum(scores[i,c("7a","7b","7c")], na.rm = TRUE)) - 2) / 6) * 100
-        
-      } else if (sum(is.na(scores[i,c("7a","7b","7c")])) == 2) {
-        dfScores[i,7] <- (((sum(scores[i,c("7a","7b","7c")], na.rm = TRUE)) - 1) / 3) * 100
-        
-      } else if (sum(is.na(scores[i,c("7a","7b","7c")])) == 3) {
+      if (sum(is.na(scores[i,c("7a","7b","7c")])) %in% c(1:3)) {
         dfScores[i,7] <- NA
         
       } else {
@@ -503,8 +530,8 @@ KHQScores <- function(
                            na.rm = TRUE)
       
     }
-    
   }
+  
   
   # Saving results to an Excel file
   if (save.xlsx == TRUE & is.null(filename) & is.null(sheetName)) {

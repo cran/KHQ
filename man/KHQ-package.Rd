@@ -20,7 +20,7 @@ The King's Health Questionnaire (KHQ) is a disease-specific,
   two instruments mentioned. The KHQ5D ca be used in the clinical and economic 
   evaluation of health care. The subject self-rates their health in terms of 
   five dimensions: Role Limitation (RL), Physical Limitations (PL), Social 
-  Limitations (SL), Emotions (E), and Sleep (S). Frequently the scores on these 
+  Limitations (SL), Emotions (E), and Sleep (S). Frequently the states on these 
   five dimensions are converted to a single utility index using country specific 
   value sets, which can be used in the clinical and economic evaluation of 
   health care as well as in population health surveys. This package provides 

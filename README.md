@@ -5,6 +5,8 @@
 [![R-CMD-check](https://github.com/augustobrusaca/KHQ/workflows/R-CMD-check/badge.svg)](https://github.com/augustobrusaca/KHQ/actions)
 [![Travis-CI Build
 Status](https://travis-ci.com/augustobrusaca/KHQ.svg?branch=master)](https://travis-ci.com/augustobrusaca/KHQ)
+[![CRAN RStudio mirror
+downloads](https://cranlogs.r-pkg.org/badges/KHQ)](https://www.r-pkg.org:443/pkg/KHQ)
 <!-- badges: end -->
 
 # KHQ
@@ -12,8 +14,9 @@ Status](https://travis-ci.com/augustobrusaca/KHQ.svg?branch=master)](https://tra
 ## King’s Health Questionnaire (KHQ)
 
 The KHQ is a disease-specific, self-administered questionnaire designed
-specific to assess the impact of Urinary incontinence (UI) on QoL. The
-questionnaire was developed by [Kelleher and collaborators in
+specific to assess the impact of Urinary incontinence (UI) on Quality of
+Life (QoL). The questionnaire was developed by [Kelleher and
+collaborators in
 1997](https://doi.org/10.1111/j.1471-0528.1997.tb11006.x). It is a
 simple, acceptable and reliable measure to use in the clinical setting
 and a research tool that is useful in evaluating UI treatment outcomes.
@@ -40,29 +43,28 @@ The KHQ5D is a condition-specific preference-based measure developed by
 as the [SF6D](https://doi.org/10.1016/S0895-4356(98)00103-6) and
 [EQ-5D](https://euroqol.org/), the KHQ5D measures health-related quality
 of life (HRQoL) specifically for UI, not general conditions like the
-others two instruments mentioned. The KHQ5D ca be used in the clinical
+others two instruments mentioned. The KHQ5D can be used in the clinical
 and economic evaluation of health care. The subject self-rates their
 health in terms of five dimensions: Role Limitation (RL), Physical
 Limitations (PL), Social Limitations (SL), Emotions (E), and Sleep (S).
-Following assessment, the scores can be reported as a five-digit number
-ranging from 11111 (full health) to 44444 (worst health). This
-five-digit number are converted to a single utility index using country
-specific value sets, which can be used in the clinical and economic
-evaluation of health care as well as in population health surveys.
+Following assessment, the Health States (i.e., scores) are reported as a
+five-digit number ranging from 11111 (full health) to 44444 (worst
+health). This five-digit Health Profiles are converted to a single
+utility value (utility index, index value) using country specific value
+sets, which can be used in the clinical and economic evaluation of
+health care as well as in population health surveys.
 
 ## Installation
 
 You can install the released version of KHQ from
-[CRAN](https://CRAN.R-project.org) with:
-
-Of note - the package is not yet released on CRAN, download directly
-from GitHub, option below.
+[CRAN](https://CRAN.R-project.org/package=KHQ) with:
 
 ``` r
-# install.packages("KHQ")
+install.packages("KHQ")
 ```
 
-And the development version from [GitHub](https://github.com/) with:
+And the development version from
+[GitHub](https://github.com/augustobrusaca/KHQ) with:
 
 ``` r
 install.packages("devtools")
@@ -76,6 +78,7 @@ devtools::install_github("augustobrusaca/KHQ")
 
 ``` r
 library(KHQ)
+library(magrittr)
 
 # The items must be named equal the number in the original questionnaire
 # published by Kelleher and collaborator in 1997 (1, 2, 3a, 3b, 4a, 4b, 
@@ -119,21 +122,14 @@ scores_UK <- data.frame(
 
 # Original algorithm
 KHQScores(scores = scores_UK, country = "UK", author = "Kelleher", 
-          year = 1997, ignore.invalid = TRUE)
-#>   GHP        II        RL        PL        SL        PR         E        SE
-#> 1   0   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000
-#> 2  25  33.33333  33.33333  33.33333  33.33333  33.33333  33.33333  33.33333
-#> 3  50  66.66667  66.66667  66.66667  66.66667  66.66667  66.66667  66.66667
-#> 4  75 100.00000 100.00000 100.00000 100.00000 100.00000 100.00000 100.00000
-#> 5 100        NA        NA        NA        NA   0.00000        NA        NA
-#> 6  NA        NA        NA        NA   0.00000   0.00000        NA        NA
-#>          SM SSS
-#> 1   0.00000   0
-#> 2  33.33333  11
-#> 3  66.66667  22
-#> 4 100.00000  33
-#> 5        NA   0
-#> 6        NA   0
+          year = 1997, ignore.invalid = TRUE) %>% round(2)
+#>   GHP     II     RL     PL     SL     PR      E     SE     SM SSS
+#> 1   0   0.00   0.00   0.00   0.00   0.00   0.00   0.00   0.00   0
+#> 2  25  33.33  33.33  33.33  33.33  33.33  33.33  33.33  33.33  11
+#> 3  50  66.67  66.67  66.67  66.67  66.67  66.67  66.67  66.67  22
+#> 4  75 100.00 100.00 100.00 100.00 100.00 100.00 100.00 100.00  33
+#> 5 100     NA     NA     NA     NA   0.00     NA     NA     NA   0
+#> 6  NA     NA     NA     NA   0.00   0.00     NA     NA     NA   0
 
 
 UK_scores <- data.frame(
@@ -158,16 +154,59 @@ UK_scores <- data.frame(
 # 'filename' and 'sheetName'. The file with the calculated scores is 
 # saved in .xlsx format (Excel file).
 KHQScores(scores = UK_scores, country = "UK", author = "Kelleher", 
-          year = 1997, save.xlsx = FALSE, 
+          year = 1997, ignore.invalid = TRUE, save.xlsx = FALSE, 
           filename = "Res_Scores_Dimensions_KHQ.xlsx", 
-          sheetName = "Scores", ignore.invalid = TRUE)
-#>   GHP        II        RL       PL       SL PR        E       SE       SM SSS
-#> 1   0 100.00000   0.00000 50.00000 66.66667 50 33.33333 50.00000 60.00000  15
-#> 2  25  66.66667  33.33333 16.66667 55.55556 50 44.44444 50.00000 53.33333  16
-#> 3  50  33.33333  66.66667 33.33333 44.44444 50 55.55556 50.00000 46.66667  17
-#> 4  75   0.00000 100.00000 83.33333 33.33333 50 66.66667 50.00000 40.00000  18
-#> 5 100        NA        NA 50.00000       NA  0 55.55556       NA 55.55556   0
-#> 6  75 100.00000  83.33333       NA  0.00000  0       NA 66.66667       NA   0
+          sheetName = "Scores") %>% round(2)
+#>   GHP     II     RL    PL    SL PR     E    SE    SM SSS
+#> 1   0 100.00   0.00 50.00 66.67 50 33.33 50.00 60.00  15
+#> 2  25  66.67  33.33 16.67 55.56 50 44.44 50.00 53.33  16
+#> 3  50  33.33  66.67 33.33 44.44 50 55.56 50.00 46.67  17
+#> 4  75   0.00 100.00 83.33 33.33 50 66.67 50.00 40.00  18
+#> 5 100     NA     NA 50.00    NA  0 55.56    NA    NA   0
+#> 6  75 100.00  83.33    NA  0.00  0    NA 66.67    NA   0
+```
+
+Dealing with missing data (scores) of the dimensions of the King’s
+Health Questionnaire following the article by [Reese and collaborators
+(2003)](https://doi.org/10.1023/A:1023422208910). Resse et al. used the
+strategy of inserting the mean of items of a certain dimension into the
+missing item of the same dimension.
+
+Reese et al. (2003) - “Missing responses for questions in a summated
+domain (i.e., all domains except the KHQ symptom severity) were imputed
+if at least half of the items in the domain had non-missing responses by
+using the mean value of responses to other items within the same
+domain.”
+
+``` r
+# Data frame with items of the original questionnaire
+df_UK_scores <- data.frame(
+  "1" = c(1,2,3,4,5,4), 
+  "2" = c(4,3,2,1,NA,4), 
+  "3a" = c(1,NA,3,4,NA,4), "3b" = c(1,2,3,4,NA,3), 
+  "4a" = c(4,1,1,3,3,NA), "4b" = c(NA,2,3,4,2,NA),
+  "4c" = c(4,3,2,1,4,1), "4d" = c(1,2,3,4,NA,1),
+  "5a" = c(4,3,2,NA,1,NA), "5b" = c(1,2,3,4,NA,1), "5c" = c(4,3,2,1,0,1),
+  "6a" = c(1,2,3,4,2,NA), "6b" = c(4,3,NA,1,2,NA), "6c" = c(1,2,3,4,4,NA),
+  "7a" = c(4,3,2,1,NA,3), "7b" = c(1,NA,3,4,NA,3),
+  "8a" = c(4,3,2,1,4,NA), "8b" = c(1,NA,3,4,2,2), "8c" = c(4,3,2,1,2,3), 
+  "8d" = c(4,3,2,1,NA,NA), "8e" = c(1,2,3,4,NA,NA),
+  "9a" = c(0,1,2,3,1,1), "9b" = c(3,2,1,0,NA,NA), "9c" = c(0,1,2,3,1,2), 
+  "9d" = c(3,2,1,0,3,1), "9e" = c(0,1,2,3,2,NA), "9f" = c(3,2,1,0,3,3), 
+  "9g" = c(0,1,2,3,NA,NA), "9h" = c(3,2,1,0,NA,3), "9i" = c(0,1,2,3,3,3), 
+  "9j" = c(3,2,1,0,NA,3), "9k" = c(0,1,2,3,1,NA),
+  check.names = FALSE)
+
+# Computing the scores of each domain of the KHQ using mean.na = TRUE
+KHQScores(scores = df_UK_scores, country = "UK", author = "Kelleher", 
+          year = 1997, ignore.invalid = TRUE, mean.na = TRUE) %>% round(2)
+#>   GHP     II     RL     PL     SL PR     E    SE    SM SSS
+#> 1   0 100.00   0.00 100.00  66.67 50 33.33 50.00 60.00  15
+#> 2  25  66.67  33.33  16.67  55.56 50 44.44 66.67 58.33  16
+#> 3  50  33.33  66.67  33.33  44.44 50 66.67 50.00 46.67  17
+#> 4  75   0.00 100.00  83.33  33.33 75 66.67 50.00 40.00  18
+#> 5 100     NA     NA  50.00 100.00  0 55.56    NA 55.56  14
+#> 6  75 100.00  83.33     NA   0.00  0    NA 66.67 50.00  16
 ```
 
 ### KHQConvKHQ5D function - converts KHQ item scores to KHQ5D scores
@@ -208,8 +247,7 @@ scores <- data.frame(
   "6a" = c(3,2,2,4,1), 
   "6b" = c(3,2,2,4,1), 
   "7a" = c(1,3,4,3,4),
-  check.names = FALSE
-)
+  check.names = FALSE)
 
 KHQConvKHQ5D(scores = scores, ignore.invalid = FALSE)
 #>   RL PL SL E S
@@ -233,8 +271,7 @@ scores_2 <- data.frame(
   "6a" = c(3,2,2,4,1), 
   "6b" = c(3,NA,2,4,1), 
   "7a" = c(1,3,4,3,4),
-  check.names = FALSE
-)
+  check.names = FALSE)
 
 KHQConvKHQ5D(scores = scores_2, ignore.invalid = TRUE)
 #>   RL PL SL E S
@@ -297,6 +334,18 @@ KHQ5D(scores = c(11111), country = "UK", type = "SG",
 #>   UtilityIndex
 #> 1        0.996
 
+# or
+
+KHQ5D(scores = c(11111, 22432, 34241, 43332, 22141), 
+      country = "UK", type = "SG", author = "Brazier", 
+      year = 2008, source = "KHQ", ignore.invalid = TRUE)
+#>   UtilityIndex
+#> 1        0.996
+#> 2        0.930
+#> 3        0.947
+#> 4        0.926
+#> 5        0.965
+
 
 # Using a data.frame with individual dimensions
 scores.df <- data.frame(
@@ -304,8 +353,7 @@ scores.df <- data.frame(
   PL = c(4,3,4,3,2), 
   SL = c(1,2,2,4,1), 
   E = c(1,3,4,3,4), 
-  S = c(1,2,1,2,1)
-)
+  S = c(1,2,1,2,1))
 
 KHQ5D(scores = scores.df, country = "UK", type = "SG", 
       author = "Brazier", year = 2008, source = "KHQ", 
@@ -344,6 +392,18 @@ KHQ5D(scores = scores.df2$state, country = "UK", type = "SG",
 #> 5        0.965
 
 
+# Using weights = TRUE to generate the weights for each score of the KHQ5D
+KHQ5D(scores = c(14411, 22432, 34241, 43332, 44444), country = "UK", type = "SG", 
+      author = "Brazier", year = 2008, source = "KHQ", 
+      ignore.invalid = TRUE, weights = TRUE)
+#>       RL     PL     SL      E      S UtilityIndex
+#> 1  0.000 -0.006 -0.027  0.000  0.000        0.963
+#> 2 -0.009 -0.006 -0.027 -0.011 -0.013        0.930
+#> 3 -0.016 -0.006 -0.011 -0.016  0.000        0.947
+#> 4 -0.029 -0.006 -0.011 -0.011 -0.013        0.926
+#> 5 -0.029 -0.006 -0.027 -0.016 -0.031        0.887
+
+
 # As with in the KHQScore function it is possible to use the 'save.xlsx'.
 KHQ5D(scores = scores.df, country = "UK", type = "SG", 
       author = "Brazier", year = 2008, source = "KHQ", 
@@ -355,6 +415,60 @@ KHQ5D(scores = scores.df, country = "UK", type = "SG",
 #> 3        0.947
 #> 4        0.910
 #> 5        0.965
+```
+
+### KHQ5Freq function - calculating the frequency, percentage, cumulative frequency and cumulative percentage for each health profile in an KHQ5D dataset
+
+``` r
+# Calculation using a data.frame with individual dimensions
+KHQ5DFreq(scores = scores.df, ignore.invalid = TRUE)
+#>   HealthState Frequency Percentage CumulativeFreq CumulativePerc
+#> 1       14111         1         20              1             20
+#> 2       22141         1         20              2             40
+#> 3       23232         1         20              3             60
+#> 4       34241         1         20              4             80
+#> 5       43432         1         20              5            100
+
+# Data.frame using five digit format
+KHQ5DFreq(scores = scores.df2, ignore.invalid = TRUE)
+#>   HealthState Frequency Percentage CumulativeFreq CumulativePerc
+#> 1       11111         1         20              1             20
+#> 2       22141         1         20              2             40
+#> 3       22432         1         20              3             60
+#> 4       34241         1         20              4             80
+#> 5       43332         1         20              5            100
+
+# or using a vector
+
+KHQ5DFreq(scores = scores.df2$state, ignore.invalid = TRUE)
+#>   HealthState Frequency Percentage CumulativeFreq CumulativePerc
+#> 1       11111         1         20              1             20
+#> 2       22141         1         20              2             40
+#> 3       22432         1         20              3             60
+#> 4       34241         1         20              4             80
+#> 5       43332         1         20              5            100
+
+# Using five digit format
+KHQ5DFreq(scores = c(11111, 11111, 22432,34241, 43332, 22141), 
+          ignore.invalid = TRUE)
+#>   HealthState Frequency Percentage CumulativeFreq CumulativePerc
+#> 1       11111         2       33.3              2           33.3
+#> 2       22141         1       16.7              3           50.0
+#> 3       22432         1       16.7              4           66.7
+#> 4       34241         1       16.7              5           83.3
+#> 5       43332         1       16.7              6          100.0
+
+# As with in the KHQScore function it is possible to use the 'save.xlsx'.
+KHQ5DFreq(scores = scores.df, save.xlsx = FALSE, 
+          filename = "Res_KHQ5D_Frequency.xlsx", 
+          sheetName = "Frequency", 
+          ignore.invalid = TRUE)
+#>   HealthState Frequency Percentage CumulativeFreq CumulativePerc
+#> 1       14111         1         20              1             20
+#> 2       22141         1         20              2             40
+#> 3       23232         1         20              3             60
+#> 4       34241         1         20              4             80
+#> 5       43432         1         20              5            100
 ```
 
 ## Example data
@@ -369,24 +483,17 @@ scores_UK <- KHQ_data_Kelleher
 # Calculating the scores of each dimension
 scores_KHQ <- KHQScores(scores = scores_UK, country = "UK", 
                         author = "Kelleher", year = 1997, 
-                        ignore.invalid = TRUE)
+                        ignore.invalid = TRUE) %>% round(2)
 
 # Top 6 scores
 head(scores_KHQ)
-#>   GHP        II        RL        PL       SL       PR        E        SE
-#> 1  50  66.66667  50.00000  66.66667  0.00000  0.00000 88.88889   0.00000
-#> 2  25  33.33333  33.33333  16.66667  0.00000  0.00000 11.11111   0.00000
-#> 3  25   0.00000   0.00000   0.00000  0.00000  0.00000  0.00000   0.00000
-#> 4  25 100.00000 100.00000 100.00000 33.33333 33.33333 44.44444 100.00000
-#> 5  25  66.66667 100.00000  83.33333 33.33333 33.33333 33.33333  16.66667
-#> 6  50 100.00000  50.00000 100.00000 66.66667 50.00000 88.88889   0.00000
-#>         SM SSS
-#> 1 46.66667   6
-#> 2 20.00000   2
-#> 3 26.66667   2
-#> 4 60.00000  15
-#> 5 66.66667  15
-#> 6 66.66667  15
+#>   GHP     II     RL     PL    SL    PR     E     SE    SM SSS
+#> 1  50  66.67  50.00  66.67  0.00  0.00 88.89   0.00 46.67   6
+#> 2  25  33.33  33.33  16.67  0.00  0.00 11.11   0.00 20.00   2
+#> 3  25   0.00   0.00   0.00  0.00  0.00  0.00   0.00 26.67   2
+#> 4  25 100.00 100.00 100.00 33.33 33.33 44.44 100.00 60.00  15
+#> 5  25  66.67 100.00  83.33 33.33 33.33 33.33  16.67 66.67  15
+#> 6  50 100.00  50.00 100.00 66.67 50.00 88.89   0.00 66.67  15
 
 
 ## Loading example data from KHQ items used to be converted to KHQ5D scores.
@@ -423,7 +530,7 @@ head(uti_index)
 #> 6        0.918
 
 
-## It is also possible to used a example data from KHQ5D.
+## It is also possible to use the KHQ5D example data.
 KHQ5D_scores <- KHQ5D_data
 
 # Calculate the scores of each dimension
@@ -440,6 +547,20 @@ head(df_uti_index)
 #> 4        0.903
 #> 5        0.927
 #> 6        0.918
+
+
+## Cumulative frequency analysis using the KHQ5D example data 
+df_res_freq <- KHQ5DFreq(scores = KHQ5D_scores, ignore.invalid = TRUE)
+
+# Top 6 scores
+head(df_res_freq)
+#>   HealthState Frequency Percentage CumulativeFreq CumulativePerc
+#> 1       13111         2        6.7              2            6.7
+#> 2       22121         2        6.7              4           13.3
+#> 3       44131         2        6.7              6           20.0
+#> 4       44441         2        6.7              8           26.7
+#> 5       44444         2        6.7             10           33.3
+#> 6       11111         1        3.3             11           36.7
 ```
 
 ## Error alerts
@@ -471,6 +592,11 @@ Items checked when running the function:
     -   Checking the country in which the weighted score was calculated;
     -   Checking other information of the data used, such as: Year,
         Author, Type, and Source.
+-   KHQ5DFreq
+    -   Checking dimension names;
+    -   Checking the five-digit data format;
+    -   Checking for NAs in the data;
+    -   Checking coded scores;
 
 Be aware that the evaluation of possible errors is done step-by-step in
 the sequence given above. So if the data has more than one error it must
@@ -523,8 +649,7 @@ scores <- data.frame(
   "6a" = c(3,2,2,4,1), 
   "6b" = c(3,2,2,4,1), 
   "7a" = c(1,3,4,3,4),
-  check.names = FALSE
-)
+  check.names = FALSE)
 
 KHQConvKHQ5D(scores = scores, ignore.invalid = FALSE)
 #>   3a 3b 4a 4b 4d 5c 6a 6b 7a
@@ -537,7 +662,11 @@ KHQConvKHQ5D(scores = scores, ignore.invalid = FALSE)
 ## Information
 
 Consult the documentation for each function and example data within the
-package using ?\[name\] of the function or example data.
+package using ?\[name\] of the function or example data. It is also
+possible to consult the functions on the [R Package
+Documentation](https://rdrr.io/cran/KHQ/man/) website or download the
+reference manual from the [CRAN](https://CRAN.R-project.org/package=KHQ)
+repository.
 
 Example: ?KHQScores
 

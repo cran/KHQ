@@ -1,7 +1,7 @@
 Package: KHQ
 Title: Methods for Calculating 'KHQ' Scores and 'KHQ5D' Utility Index
         Scores
-Version: 0.1.0
+Version: 0.2.0
 Authors@R: 
     person(given = "Luiz Augusto",
            family = "Brusaca",
@@ -22,7 +22,7 @@ Description: The King's Health Questionnaire (KHQ) is a disease-specific,
   two instruments mentioned. The KHQ5D ca be used in the clinical and economic 
   evaluation of health care. The subject self-rates their health in terms of 
   five dimensions: Role Limitation (RL), Physical Limitations (PL), Social 
-  Limitations (SL), Emotions (E), and Sleep (S). Frequently the scores on these 
+  Limitations (SL), Emotions (E), and Sleep (S). Frequently the states on these 
   five dimensions are converted to a single utility index using country specific 
   value sets, which can be used in the clinical and economic evaluation of 
   health care as well as in population health surveys. This package provides 
@@ -41,9 +41,9 @@ VignetteBuilder: knitr
 Language: en-GB
 Config/testthat/edition: 3
 NeedsCompilation: no
-Packaged: 2021-07-16 16:11:20 UTC; augus
+Packaged: 2021-08-06 09:22:17 UTC; augus
 Author: Luiz Augusto Brusaca [aut, cre]
     (<https://orcid.org/0000-0001-8201-6433>)
 Maintainer: Luiz Augusto Brusaca <augustobrusaca@gmail.com>
 Repository: CRAN
-Date/Publication: 2021-07-20 07:20:11 UTC
+Date/Publication: 2021-08-06 09:40:02 UTC
